@@ -1,0 +1,62 @@
+LJEA Biological Data Documentation
+===================================
+
+File: LJEA_biological_data.xlsx
+
+Sheets:
+- "Year by Year Data" - PRIMARY DATA SHEET for time series analysis
+- "Comparison Data" - Cross-site comparison for a single time period
+- "Chart Calculations" - Supporting calculations
+- "Charts" - Empty (charts are in Excel)
+
+Data Structure (Year by Year Data):
+-----------------------------------
+Data is organized in blocks, one per site. Each block contains:
+- Row 1: Site name and location (e.g., "White Creek - Above Route 126")
+- Row 2: Time periods as headers (Fall 2018, Summer 2019, Summer 2020, etc.)
+- Rows 3+: Metrics with values for each time period
+
+Metrics Available:
+- Total Taxa Richness: Count of unique macroinvertebrate taxa
+- EPT Taxa Richness: Count of Ephemeroptera, Plecoptera, Trichoptera taxa (pollution-sensitive)
+- Total Abundance: Total count of individuals
+- EPT Abundance: Count of EPT individuals
+- Percent EPT: EPT Abundance / Total Abundance
+- Intolerant Species (< 2.5 Tolerance Value): Count of pollution-intolerant species
+- NCBI Score: North Carolina Biotic Index (KEY METRIC for graphs)
+- Theoretical Bioclassification: Rating based on NCBI (Excellent, Good, Good-Fair, Fair, Poor)
+
+NCBI Score Interpretation:
+- < 2.5: Excellent
+- 2.5-3.5: Good
+- 3.5-4.5: Good-Fair / Fair
+- 4.5-5.5: Fair
+- > 5.5: Poor
+
+Time Periods:
+- Fall 2018, Summer 2019, Summer 2020, Winter 2021, Summer 2022, Summer 2023, Summer 2024, Summer 2025
+
+Sites in Data (mapped to INSTRUCTIONS.txt groups):
+--------------------------------------------------
+Group 1:
+- Mill Creek @ Andrews Geyser (Upper Mill @ Andrews Geyser)
+- Mackey Creek below Hwy 70
+- Crooked Creek @ McHone Dr.
+- Catawba River @ Parker Padgett Rd (proxy for Greenlee Park)
+
+Group 2:
+- North Fork Catawba River - American Thread Rd (Upper North Fork / Armstrong Creek area)
+- North Fork Catawba River - North Cove School Rd (Lower North Fork)
+- Armstrong Creek above Hwy 221
+
+Group 3:
+- Linville River @ Griffin Cottage (Fonta Flora area)
+- White Creek - Above Route 126
+- Linville River off Newland Hwy (near Blue Ridge Parkway)
+
+Parsing Notes:
+--------------
+- Header row is NOT row 0; data starts with site blocks
+- Use header=None when reading, then parse manually
+- Empty cells (NaN) indicate no sampling that period
+- NCBI Score row index varies by block; search for "NCBI Score" in column 0

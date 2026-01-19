@@ -1,0 +1,50 @@
+LJEA Chlorophyll Data Documentation
+====================================
+
+File: LJEA_chloro_data.xlsx
+
+Overview:
+- Chlorophyll a measurements at Lake James sites (2018-2025)
+- Units: µg/L (micrograms per liter)
+- Measured monthly May-October each year
+- Lake sites only (no stream/river sites)
+
+Sheets:
+- "2018" through "2025": Individual year data
+- "Trend 18-23" and "Trend 2018-2025": Annual average trends
+- "Sheet1": Summary statistics
+
+Data Structure (yearly sheets):
+-------------------------------
+Row 4: Headers - Date, LJ 6 (µg/L), LJ 7 (µg/L), LJ 8 (µg/L), LJ 9 (µg/L), LJ 11 (µg/L), Mean, mean w/o 6
+Row 5+: Monthly measurements (May-October)
+Last data row: Annual mean
+
+Sites (Lake James only):
+- LJ 6: Plantation Point (often has highest values - algae accumulation)
+- LJ 7: Big Island
+- LJ 8: Marion Lake Club
+- LJ 9: Paddy Creek Dam
+- LJ 11: Lower Linville
+
+Note: "mean w/o 6" excludes LJ 6 (Plantation Point) which often has elevated values
+due to localized conditions.
+
+Chlorophyll a Interpretation:
+- < 2.5 µg/L: Oligotrophic (low nutrients, clear water)
+- 2.5-8 µg/L: Mesotrophic (moderate nutrients)
+- > 8 µg/L: Eutrophic (high nutrients, potential algae issues)
+
+Parsing Notes:
+--------------
+- Use header=None, data starts at row 5 (0-indexed: 4)
+- Column 1: Date (datetime or string like "May 2025")
+- Columns 2-6: Site values (LJ 6, 7, 8, 9, 11)
+- Column 8: Mean of all sites
+- Column 9: Mean excluding LJ 6
+- Dates may be datetime objects or strings depending on year
+
+Trend Data (Trend 2018-2025 sheet):
+- Row 3: Headers (Year, Whole lake)
+- Rows 4-11: Annual whole-lake averages (2018-2025)
+- Rows 14-19: Annual averages without LJ 6
