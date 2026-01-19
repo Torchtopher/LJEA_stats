@@ -155,9 +155,9 @@ def plot_time_series_po4_nh3(df):
         # Add reference lines
         if param in REGIONAL_AVG:
             ax.axhline(y=REGIONAL_AVG[param], color='gray', linestyle='--',
-                      linewidth=1, alpha=0.7, label=f'Regional Avg ({REGIONAL_AVG[param]})')
+                      linewidth=2, alpha=1.0, label=f'Regional Avg ({REGIONAL_AVG[param]})')
             ax.axhline(y=PRISTINE_AVG[param], color='green', linestyle=':',
-                      linewidth=1, alpha=0.7, label=f'Pristine Avg ({PRISTINE_AVG[param]})')
+                      linewidth=2, alpha=1.0, label=f'Pristine Avg ({PRISTINE_AVG[param]})')
 
         # Hurricane Helene marker
         ax.axvline(x=pd.Timestamp('2024-09-27'), color='red', linestyle='--',
@@ -178,10 +178,10 @@ def plot_time_series_po4_nh3(df):
     axes[1].xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
     axes[1].set_xlabel('Date')
 
-    # Legend
+    # Legend - moved to left side to avoid covering Hurricane Helene annotation
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.02),
-              ncol=3, frameon=True, fancybox=True)
+    fig.legend(handles, labels, loc='center left', bbox_to_anchor=(0.02, 0.5),
+              ncol=1, frameon=True, fancybox=True)
 
     fig.suptitle('Chemical Parameters at River Monitoring Sites (2018-2025)',
                 fontweight='bold', y=1.02)
@@ -210,9 +210,9 @@ def plot_time_series_individual(df, param, sites_dict, colors_dict, site_type='R
     # Reference lines for river sites
     if site_type == 'River' and param in REGIONAL_AVG:
         ax.axhline(y=REGIONAL_AVG[param], color='gray', linestyle='--',
-                  linewidth=1, alpha=0.7, label=f'Regional Avg')
+                  linewidth=2, alpha=1.0, label=f'Regional Avg')
         ax.axhline(y=PRISTINE_AVG[param], color='green', linestyle=':',
-                  linewidth=1, alpha=0.7, label=f'Pristine Avg')
+                  linewidth=2, alpha=1.0, label=f'Pristine Avg')
 
     # Hurricane Helene marker
     ax.axvline(x=pd.Timestamp('2024-09-27'), color='red', linestyle='--',
@@ -226,7 +226,7 @@ def plot_time_series_individual(df, param, sites_dict, colors_dict, site_type='R
     ax.xaxis.set_major_locator(mdates.YearLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
 
-    ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), frameon=True)
+    ax.legend(loc='upper right', bbox_to_anchor=(-0.25, 1), frameon=True)
 
     plt.tight_layout()
     filename = f'timeseries_{param}_{site_type.lower()}_sites.png'
@@ -241,7 +241,7 @@ def plot_time_series_individual(df, param, sites_dict, colors_dict, site_type='R
 
 def plot_boxplots_river_sites(df):
     """Create box plots for PO4, NH3-N, TSS at river sites."""
-    fig, axes = plt.subplots(1, 3, figsize=(14, 5))
+    fig, axes = plt.subplots(1, 3, figsize=(16, 6))
 
     params = ['PO4', 'NH3-N', 'TSS']
     titles = ['Orthophosphate (PO₄)', 'Ammonia-Nitrogen (NH₃-N)', 'Total Suspended Solids (TSS)']
@@ -254,6 +254,12 @@ def plot_boxplots_river_sites(df):
         # Get data for this parameter
         plot_data = river_df.dropna(subset=[param])
 
+        # Remove highest 2 outliers for TSS
+        if param == 'TSS' and len(plot_data) > 2:
+            sorted_tss = plot_data[param].sort_values(ascending=False)
+            threshold = sorted_tss.iloc[2]  # Keep up to third highest
+            plot_data = plot_data[plot_data[param] <= threshold]
+
         if len(plot_data) > 0:
             # Order by site number
             site_order = [f"{s}: {RIVER_SITES[s][:15]}..." for s in ['2', '5', '13', '17', '19']]
@@ -263,12 +269,17 @@ def plot_boxplots_river_sites(df):
                        order=site_order, hue='Site', palette='Set2',
                        width=0.6, legend=False)
 
-            # Add reference lines
+            # Add reference lines with improved visibility
             if param in REGIONAL_AVG:
                 ax.axhline(y=REGIONAL_AVG[param], color='gray', linestyle='--',
-                          linewidth=1, alpha=0.7, label='Regional')
+                          linewidth=2, alpha=1.0)
                 ax.axhline(y=PRISTINE_AVG[param], color='green', linestyle=':',
-                          linewidth=1, alpha=0.7, label='Pristine')
+                          linewidth=2, alpha=1.0)
+                # Add labels to reference lines
+                ax.text(ax.get_xlim()[1], REGIONAL_AVG[param], f'Regional Avg ({REGIONAL_AVG[param]})', 
+                       fontsize=8, va='bottom', ha='right', color='gray', backgroundcolor='white')
+                ax.text(ax.get_xlim()[1], PRISTINE_AVG[param], f'Pristine Avg ({PRISTINE_AVG[param]})', 
+                       fontsize=8, va='bottom', ha='right', color='green', backgroundcolor='white')
 
             # Add sample sizes
             for i, site in enumerate(site_order):
@@ -276,15 +287,21 @@ def plot_boxplots_river_sites(df):
                 ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]),
                            ha='center', va='top', fontsize=8, color='gray')
 
+            # Add note for TSS outliers
+            if param == 'TSS':
+                ax.text(0.02, 0.98, 'Note: Highest 2 TSS outliers removed', 
+                       transform=ax.transAxes, fontsize=8, va='top', ha='left', 
+                       bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7))
+
         ax.set_ylabel(f'{param} ({UNITS[param]})')
         ax.set_xlabel('')
         ax.set_title(title, fontweight='bold')
         ax.tick_params(axis='x', rotation=45)
         ax.grid(True, axis='y', alpha=0.3)
 
-    # Add period of record note
+    # Add period of record note with better positioning
     date_range = f"{river_df['date'].min().strftime('%Y-%m')} to {river_df['date'].max().strftime('%Y-%m')}"
-    fig.text(0.5, -0.02, f'Period of Record: {date_range}', ha='center', fontsize=9, style='italic')
+    fig.text(0.5, -0.08, f'Period of Record: {date_range}', ha='center', fontsize=9, style='italic')
 
     fig.suptitle('Chemical Parameters at River Monitoring Sites', fontweight='bold', y=1.02)
 
@@ -396,9 +413,9 @@ def plot_time_series_by_site(df):
                 # Add reference lines
                 if param in REGIONAL_AVG:
                     ax.axhline(y=REGIONAL_AVG[param], color='gray', linestyle='--',
-                              linewidth=1, alpha=0.7, label=f'Regional Avg ({REGIONAL_AVG[param]})')
+                              linewidth=2, alpha=1.0, label=f'Regional Avg ({REGIONAL_AVG[param]})')
                     ax.axhline(y=PRISTINE_AVG[param], color='green', linestyle=':',
-                              linewidth=1, alpha=0.7, label=f'Pristine Avg ({PRISTINE_AVG[param]})')
+                              linewidth=2, alpha=1.0, label=f'Pristine Avg ({PRISTINE_AVG[param]})')
 
                 # Hurricane Helene marker
                 ax.axvline(x=pd.Timestamp('2024-09-27'), color='red', linestyle='--',
@@ -434,12 +451,18 @@ def plot_time_series_by_site(df):
 
 def plot_boxplot_single_param_river(df, param, title, palette='Set2'):
     """Create a single box plot for one parameter across river sites."""
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 7))
 
     river_df = df[df['site #'].isin(RIVER_SITES.keys())].copy()
     river_df['Site'] = river_df['site #'].map(lambda x: f"{x}: {RIVER_SITES[x]}")
 
     plot_data = river_df.dropna(subset=[param])
+
+    # Remove highest 2 outliers for TSS
+    if param == 'TSS' and len(plot_data) > 2:
+        sorted_tss = plot_data[param].sort_values(ascending=False)
+        threshold = sorted_tss.iloc[2]  # Keep up to third highest
+        plot_data = plot_data[plot_data[param] <= threshold]
 
     if len(plot_data) == 0:
         plt.close()
@@ -451,18 +474,28 @@ def plot_boxplot_single_param_river(df, param, title, palette='Set2'):
     sns.boxplot(data=plot_data, x='Site', y=param, ax=ax,
                order=site_order, hue='Site', palette=palette, width=0.6, legend=False)
 
-    # Add reference lines
+    # Add reference lines with improved visibility
     if param in REGIONAL_AVG:
         ax.axhline(y=REGIONAL_AVG[param], color='gray', linestyle='--',
-                  linewidth=1.5, alpha=0.7, label=f'Regional Avg ({REGIONAL_AVG[param]})')
+                  linewidth=2, alpha=1.0)
         ax.axhline(y=PRISTINE_AVG[param], color='green', linestyle=':',
-                  linewidth=1.5, alpha=0.7, label=f'Pristine Avg ({PRISTINE_AVG[param]})')
-        ax.legend(loc='upper right')
+                  linewidth=2, alpha=1.0)
+        # Add labels to reference lines
+        ax.text(ax.get_xlim()[1], REGIONAL_AVG[param], f'Regional Avg ({REGIONAL_AVG[param]})', 
+               fontsize=9, va='bottom', ha='right', color='gray', backgroundcolor='white')
+        ax.text(ax.get_xlim()[1], PRISTINE_AVG[param], f'Pristine Avg ({PRISTINE_AVG[param]})', 
+               fontsize=9, va='bottom', ha='right', color='green', backgroundcolor='white')
 
     # Add sample sizes
     for i, site in enumerate(site_order):
         n = len(plot_data[plot_data['Site'] == site])
         ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=9, color='gray')
+
+    # Add note for TSS outliers
+    if param == 'TSS':
+        ax.text(0.02, 0.98, 'Note: Highest 2 TSS outliers removed', 
+               transform=ax.transAxes, fontsize=9, va='top', ha='left', 
+               bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7))
 
     ax.set_ylabel(f'{param} ({UNITS[param]})')
     ax.set_xlabel('Site')
@@ -470,9 +503,9 @@ def plot_boxplot_single_param_river(df, param, title, palette='Set2'):
     ax.tick_params(axis='x', rotation=45)
     ax.grid(True, axis='y', alpha=0.3)
 
-    # Add period of record
+    # Add period of record with better positioning
     date_range = f"{river_df['date'].min().strftime('%Y-%m')} to {river_df['date'].max().strftime('%Y-%m')}"
-    ax.annotate(f'Period of Record: {date_range}', xy=(0.5, -0.18), xycoords='axes fraction',
+    ax.annotate(f'Period of Record: {date_range}', xy=(0.5, -0.15), xycoords='axes fraction',
                ha='center', fontsize=9, style='italic')
 
     plt.tight_layout()
