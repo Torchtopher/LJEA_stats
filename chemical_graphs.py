@@ -152,13 +152,27 @@ def plot_time_series_po4_nh3(df):
                        label=f"Site {site_id}: {site_name}",
                        markersize=4, linewidth=1, alpha=0.8)
 
-        # Add reference lines
-        if param in REGIONAL_AVG:
-            ax.axhline(y=REGIONAL_AVG[param], color='gray', linestyle='--',
-                      linewidth=2, alpha=1.0, label=f'Regional Avg ({REGIONAL_AVG[param]})')
-            ax.axhline(y=PRISTINE_AVG[param], color='green', linestyle=':',
-                      linewidth=2, alpha=1.0, label=f'Pristine Avg ({PRISTINE_AVG[param]})')
+                # Add reference lines
+            if param in REGIONAL_AVG:
+                # Draw lines
+                y_reg = REGIONAL_AVG[param]
+                y_pri = PRISTINE_AVG[param]
 
+                ax.axhline(y=y_reg, color='gray', linestyle='--', linewidth=2, alpha=1.0)
+                ax.axhline(y=y_pri, color='green', linestyle=':', linewidth=2, alpha=1.0)
+
+                # After plotting, get current x-limits
+                x0, x1 = ax.get_xlim()
+                pad = 0.01 * (x1 - x0)
+
+                # Add text labels aligned left
+                ax.text(x0 + pad, y_reg,
+                        f"Regional Avg ({y_reg})",
+                        ha='left', va='center')
+
+                ax.text(x0 + pad, y_pri,
+                        f"Pristine Avg ({y_pri})",
+                        ha='left', va='center')
         # Hurricane Helene marker
         ax.axvline(x=pd.Timestamp('2024-09-27'), color='red', linestyle='--',
                   linewidth=1.5, alpha=0.7)
@@ -207,12 +221,28 @@ def plot_time_series_individual(df, param, sites_dict, colors_dict, site_type='R
                        label=f"Site {site_id}: {site_name}",
                        markersize=4, linewidth=1, alpha=0.8)
 
-    # Reference lines for river sites
-    if site_type == 'River' and param in REGIONAL_AVG:
-        ax.axhline(y=REGIONAL_AVG[param], color='gray', linestyle='--',
-                  linewidth=2, alpha=1.0, label=f'Regional Avg')
-        ax.axhline(y=PRISTINE_AVG[param], color='green', linestyle=':',
-                  linewidth=2, alpha=1.0, label=f'Pristine Avg')
+        # Reference lines for river sites
+        if site_type == 'River' and param in REGIONAL_AVG:
+            # draw the lines
+            y_reg = REGIONAL_AVG[param]
+            y_pri = PRISTINE_AVG[param]
+
+            ax.axhline(y=y_reg, color='gray', linestyle='--', linewidth=2, alpha=1.0)
+            ax.axhline(y=y_pri, color='green', linestyle=':', linewidth=2, alpha=1.0)
+
+            # find left edge of x-axis in data coords
+            x0, x1 = ax.get_xlim()
+            pad = 0.01 * (x1 - x0)   # small horizontal padding
+
+            # textual labels positioned at left, vertically centered on the line
+            ax.text(x0 + pad, y_reg,
+                    f"Regional Avg ({y_reg})",
+                    ha='left', va='center')
+
+            ax.text(x0 + pad, y_pri,
+                    f"Pristine Avg ({y_pri})",
+                    ha='left', va='center')
+
 
     # Hurricane Helene marker
     ax.axvline(x=pd.Timestamp('2024-09-27'), color='red', linestyle='--',
@@ -226,7 +256,7 @@ def plot_time_series_individual(df, param, sites_dict, colors_dict, site_type='R
     ax.xaxis.set_major_locator(mdates.YearLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
 
-    ax.legend(loc='upper right', bbox_to_anchor=(-0.25, 1), frameon=True)
+    ax.legend(loc='upper left', bbox_to_anchor=(-0.25, 1), frameon=True)
 
     plt.tight_layout()
     filename = f'timeseries_{param}_{site_type.lower()}_sites.png'
@@ -424,7 +454,7 @@ def plot_time_series_by_site(df):
                 ax.set_ylabel(f'{param} ({UNITS[param]})')
                 ax.set_title(title, fontweight='bold')
                 ax.grid(True, alpha=0.3)
-                ax.legend(loc='upper right', fontsize=8)
+                ax.legend(loc='upper left', fontsize=8)
 
         # Add Hurricane annotation
         axes[0].annotate('Hurricane\nHelene', xy=(pd.Timestamp('2024-09-27'), axes[0].get_ylim()[1]*0.9),
