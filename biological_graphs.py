@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import io
+import textwrap
 
 # =============================================================================
 # Configuration & Styling
@@ -25,7 +26,7 @@ plt.rcParams.update({
     'font.size': 10,
     'axes.titlesize': 12,
     'axes.labelsize': 11,
-    'xtick.labelsize': 9,
+    'xtick.labelsize': 10,
     'ytick.labelsize': 9,
     'legend.fontsize': 9,
     'figure.titlesize': 14,
@@ -111,14 +112,14 @@ def prepare_group_data(sites):
 def plot_all_sites_boxplots(data):
     """Create multi-site comparison boxplot for ALL sites, ordered by average score."""
 
-    # Calculate average score per site and sort (lower is better)
-    site_avgs = data.groupby('Name')['NCBI_Score'].mean().sort_values()
+    # Calculate average score per site and sort (descending: worst on left, best on right)
+    site_avgs = data.groupby('Name')['NCBI_Score'].mean().sort_values(ascending=False)
     ordered_sites = site_avgs.index.tolist()
 
     # Create figure
     fig, ax = plt.subplots(figsize=(14, 7))
 
-    # Create boxplot with viridis gradient palette
+    # Create boxplot with viridis gradient (dark=worst on left, bright=best on right)
     sns.boxplot(
         data=data,
         x='Name',
@@ -132,17 +133,19 @@ def plot_all_sites_boxplots(data):
         ax=ax
     )
 
-    # Add "Excellent" threshold line
-    ax.axhline(y=EXCELLENT_THRESH, color='green', linestyle='--', linewidth=1, alpha=0.5)
+    # Add median line for all data with legend
+    overall_median = data['NCBI_Score'].median()
+    median_line = ax.axhline(y=overall_median, color='red', linestyle='--', linewidth=1.5, alpha=0.7)
+    ax.legend([median_line], [f'Overall Median ({overall_median:.2f})'], loc='upper left')
 
     # Title and labels
     ax.set_title('Distribution of NCBI Scores (2018-2025)', fontweight='bold')
-    ax.set_ylabel('NCBI Score')
+    ax.set_ylabel('NCBI Score (lower is better)')
     ax.set_xlabel('')
 
-    # Rotate x-axis labels
-    ax.tick_params(axis='x', rotation=45)
-    plt.setp(ax.get_xticklabels(), ha='right')
+    # Wrap x-axis labels to 2 lines and rotate diagonally
+    wrapped_labels = [textwrap.fill(site, width=20) for site in ordered_sites]
+    ax.set_xticklabels(wrapped_labels, rotation=70, ha='right')
 
     # Grid
     ax.grid(True, axis='y', alpha=0.3)
@@ -150,13 +153,13 @@ def plot_all_sites_boxplots(data):
     # Add sample sizes below each site name
     for i, site in enumerate(ordered_sites):
         n = len(data[data['Name'] == site])
-        ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top',
-                    xytext=(0, -15), textcoords='offset points', fontsize=8, color='gray')
+        ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', rotation=70,
+                    xytext=(0, -25), textcoords='offset points', fontsize=8, color='gray')
 
     # Footer text
     fig.text(
         0.5, -0.05,
-        'Sites ordered by average water quality (Best to Worst). Period: 2018 to 2025',
+        'Sites ordered by average NCBI score (Worst to Best). Period: 2018 to 2025',
         ha='center',
         fontsize=9,
         style='italic'
@@ -167,7 +170,7 @@ def plot_all_sites_boxplots(data):
     # Save
     filename = "macro_boxplots_all_sites.png"
     plt.savefig(OUTPUT_DIR / filename, dpi=300, bbox_inches='tight', facecolor='white')
-    plt.show()
+    # plt.show()
     plt.close()
     print(f"Saved: {OUTPUT_DIR / filename}")
 
@@ -175,8 +178,8 @@ def plot_all_sites_boxplots(data):
 def plot_group_boxplots(data, group_name, palette='viridis'):
     """Create multi-site comparison boxplot for a group, ordered by average score."""
 
-    # Calculate average score per site and sort (lower is better)
-    site_avgs = data.groupby('Name')['NCBI_Score'].mean().sort_values()
+    # Calculate average score per site and sort (descending: worst on left, best on right)
+    site_avgs = data.groupby('Name')['NCBI_Score'].mean().sort_values(ascending=False)
     ordered_sites = site_avgs.index.tolist()
 
     # Create figure - width scales with number of sites
@@ -199,16 +202,15 @@ def plot_group_boxplots(data, group_name, palette='viridis'):
     )
 
     # Add "Excellent" threshold line
-    ax.axhline(y=EXCELLENT_THRESH, color='green', linestyle='--', linewidth=1, alpha=0.5)
 
     # Title and labels
     ax.set_title(f'Distribution of NCBI Scores - {group_name} (2018-2025)', fontweight='bold')
     ax.set_ylabel('NCBI Score')
     ax.set_xlabel('')
 
-    # Rotate x-axis labels
+    # X-axis labels (no rotation, centered)
     ax.tick_params(axis='x', rotation=0)
-    plt.setp(ax.get_xticklabels(), ha='right')
+    plt.setp(ax.get_xticklabels(), ha='center')
 
     # Grid
     ax.grid(True, axis='y', alpha=0.3)
@@ -217,12 +219,12 @@ def plot_group_boxplots(data, group_name, palette='viridis'):
     for i, site in enumerate(ordered_sites):
         n = len(data[data['Name'] == site])
         ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top',
-                    xytext=(0, -15), textcoords='offset points', fontsize=8, color='gray')
+                    xytext=(0, -25), textcoords='offset points', fontsize=8, color='gray')
 
     # Footer text
     fig.text(
         0.5, -0.05,
-        f'Sites ordered by average water quality (Best to Worst). Period: 2018 to 2025',
+        f'Sites ordered by average NCBI score (Worst to Best). Period: 2018 to 2025',
         ha='center',
         fontsize=9,
         style='italic'
@@ -233,7 +235,7 @@ def plot_group_boxplots(data, group_name, palette='viridis'):
     # Save
     filename = f"macro_boxplots_{group_name.lower().replace(' ', '_')}.png"
     plt.savefig(OUTPUT_DIR / filename, dpi=300, bbox_inches='tight', facecolor='white')
-    plt.show()
+    # plt.show()
     plt.close()
     print(f"Saved: {OUTPUT_DIR / filename}")
 

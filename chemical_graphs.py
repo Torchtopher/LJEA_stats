@@ -581,8 +581,8 @@ def plot_boxplot_single_param_lake(df, chlor_df, param, title, palette='Blues'):
 
     # Add thresholds for chlorophyll
     if param == 'Chlor_a':
-        line_oligo = ax.axhline(y=2.5, color='green', linestyle=':', linewidth=2, alpha=1.0)
-        line_eutro = ax.axhline(y=8, color='orange', linestyle=':', linewidth=2, alpha=1.0)
+        line_oligo = ax.axhline(y=5, color='green', linestyle=':', linewidth=2, alpha=1.0)
+        line_meso = ax.axhline(y=8, color='orange', linestyle=':', linewidth=2, alpha=1.0)
 
         # Add text annotations (optional)
         # ax.annotate('Oligotrophic (<2.5)', xy=(ax.get_xlim()[1], 2.5), fontsize=8, color='green',
@@ -591,8 +591,8 @@ def plot_boxplot_single_param_lake(df, chlor_df, param, title, palette='Blues'):
         #             va='bottom', ha='right')
 
         # ➜ Add legend entries
-        ax.legend(handles=[line_oligo, line_eutro],
-                labels=['Oligotrophic (<2.5)', 'Eutrophic (>8)'],
+        ax.legend(handles=[line_oligo, line_meso],
+                labels=['Oligotrophic (<5)', 'Mesotrophic (>10)'],
                 loc='upper right')
     # Add sample sizes
     for i, site in enumerate(site_order):
@@ -612,6 +612,56 @@ def plot_boxplot_single_param_lake(df, chlor_df, param, title, palette='Blues'):
 
     plt.tight_layout()
     filename = f'boxplot_lake_{param.replace("-", "").replace(" ", "_")}.png'
+    plt.savefig(OUTPUT_DIR / filename, bbox_inches='tight', facecolor='white')
+    plt.close()
+    print(f"Saved: {OUTPUT_DIR / filename}")
+
+
+# =============================================================================
+# Combined Lake Site Plots (NH3-N, Total P, Chlorophyll a per site)
+# =============================================================================
+
+def plot_lake_site_combined(df, chlor_df, site_id, site_name):
+    """Create a combined figure with NH3-N, Total P, and Chlorophyll a for a single lake site."""
+    fig, axes = plt.subplots(1, 3, figsize=(12, 5))
+
+    # Prepare data for this site
+    site_chem = df[df['site #'] == site_id].copy()
+    site_chlor = chlor_df[chlor_df['site #'] == site_id].copy()
+
+    params = [
+        ('NH3-N', site_chem, 'NH3-N', 'Ammonia-Nitrogen\n(NH₃-N)', 'Blues', UNITS['NH3-N']),
+        ('Total P', site_chem, 'Total P', 'Total Phosphorus\n(as PO₄)', 'Greens', UNITS['Total P']),
+        ('Chlor_a', site_chlor, 'Chlor_a', 'Chlorophyll a', 'YlGn', UNITS['Chlor_a']),
+    ]
+
+    for ax, (param, data, col, title, palette, unit) in zip(axes, params):
+        plot_data = data.dropna(subset=[col])
+
+        if len(plot_data) > 0:
+            # Get color from palette
+            color = sns.color_palette(palette, 3)[1]  # Middle color from palette
+
+            sns.boxplot(y=plot_data[col], ax=ax, color=color, width=0.5)
+
+            # Add sample size
+            n = len(plot_data)
+            ax.text(0, -0.12, f'n={n}', ha='center', va='top', fontsize=9,
+                    color='gray', transform=ax.get_xaxis_transform())
+
+        ax.set_title(title, fontweight='bold')
+        ax.set_ylabel(f'{col} ({unit})')
+        ax.set_xlabel('')
+        ax.set_xticks([])
+        ax.grid(True, axis='y', alpha=0.3)
+
+    # Main title
+    fig.suptitle(f'Site {site_id}: {site_name}\nWater Quality Parameters (2018-2025)',
+                 fontweight='bold', y=1.02)
+
+    plt.tight_layout()
+
+    filename = f'lake_site_{site_id}_combined.png'
     plt.savefig(OUTPUT_DIR / filename, bbox_inches='tight', facecolor='white')
     plt.close()
     print(f"Saved: {OUTPUT_DIR / filename}")
@@ -662,6 +712,11 @@ def main():
     plot_boxplot_single_param_lake(df, chlor_df, 'NH3-N', 'Ammonia-Nitrogen (NH₃-N)', palette='Blues')
     plot_boxplot_single_param_lake(df, chlor_df, 'Total P', 'Total Phosphorus (as PO₄)', palette='Greens')
     plot_boxplot_single_param_lake(df, chlor_df, 'Chlor_a', 'Chlorophyll a', palette='YlGn')
+
+    # Generate combined plots for each lake site (NH3-N, Total P, Chlor_a together)
+    print("\nGenerating combined lake site plots...")
+    for site_id, site_name in LAKE_SITES.items():
+        plot_lake_site_combined(df, chlor_df, site_id, site_name)
 
     print("\n" + "=" * 60)
     print("All chemical data figures saved to LJEA/ folder")
