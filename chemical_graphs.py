@@ -133,78 +133,78 @@ def load_chlorophyll_data():
 # Time Series Plots
 # =============================================================================
 
-def plot_time_series_po4_nh3(df):
-    """
-    Create time series plots for PO4 and NH3-N at river sites.
-    Two-panel figure with shared x-axis.
-    """
-    fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+# def plot_time_series_po4_nh3(df):
+#     """
+#     Create time series plots for PO4 and NH3-N at river sites.
+#     Two-panel figure with shared x-axis.
+#     """
+#     fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
-    params = ['PO4', 'NH3-N']
-    titles = ['Orthophosphate (PO₄)', 'Ammonia-Nitrogen (NH₃-N)']
+#     params = ['PO4', 'NH3-N']
+#     titles = ['Orthophosphate (PO₄)', 'Ammonia-Nitrogen (NH₃-N)']
 
-    for ax, param, title in zip(axes, params, titles):
-        for site_id, site_name in RIVER_SITES.items():
-            site_data = df[df['site #'] == site_id].sort_values('date')
-            if len(site_data) > 0:
-                ax.plot(site_data['date'], site_data[param],
-                       'o-', color=SITE_COLORS[site_id],
-                       label=f"Site {site_id}: {site_name}",
-                       markersize=4, linewidth=1, alpha=0.8)
+#     for ax, param, title in zip(axes, params, titles):
+#         for site_id, site_name in RIVER_SITES.items():
+#             site_data = df[df['site #'] == site_id].sort_values('date')
+#             if len(site_data) > 0:
+#                 ax.plot(site_data['date'], site_data[param],
+#                        'o-', color=SITE_COLORS[site_id],
+#                        label=f"Site {site_id}: {site_name}",
+#                        markersize=4, linewidth=1, alpha=0.8)
 
-                # Add reference lines
-            if param in REGIONAL_AVG:
-                # Draw lines
-                y_reg = REGIONAL_AVG[param]
-                y_pri = PRISTINE_AVG[param]
+#                 # Add reference lines
+#             if param in REGIONAL_AVG:
+#                 # Draw lines
+#                 y_reg = REGIONAL_AVG[param]
+#                 y_pri = PRISTINE_AVG[param]
 
-                ax.axhline(y=y_reg, color='gray', linestyle='--', linewidth=2, alpha=1.0)
-                ax.axhline(y=y_pri, color='green', linestyle=':', linewidth=2, alpha=1.0)
+#                 ax.axhline(y=y_reg, color='gray', linestyle='--', linewidth=2, alpha=1.0)
+#                 ax.axhline(y=y_pri, color='green', linestyle=':', linewidth=2, alpha=1.0)
 
-                # After plotting, get current x-limits
-                x0, x1 = ax.get_xlim()
-                pad = 0.01 * (x1 - x0)
+#                 # After plotting, get current x-limits
+#                 x0, x1 = ax.get_xlim()
+#                 pad = 0.01 * (x1 - x0)
 
-                # Add text labels aligned left
-                ax.text(x0 + pad, y_reg,
-                        f"Regional Avg ({y_reg})",
-                        ha='left', va='center')
+#                 # Add text labels aligned left
+#                 ax.text(x0 + pad, y_reg,
+#                         f"Regional Avg ({y_reg})",
+#                         ha='left', va='center')
 
-                ax.text(x0 + pad, y_pri,
-                        f"Pristine Avg ({y_pri})",
-                        ha='left', va='center')
-        # Hurricane Helene marker
-        ax.axvline(x=pd.Timestamp('2024-09-27'), color='red', linestyle='--',
-                  linewidth=1.5, alpha=0.7)
+#                 ax.text(x0 + pad, y_pri,
+#                         f"Pristine Avg ({y_pri})",
+#                         ha='left', va='center')
+#         # Hurricane Helene marker
+#         ax.axvline(x=pd.Timestamp('2024-09-27'), color='red', linestyle='--',
+#                   linewidth=1.5, alpha=0.7)
 
-        ax.set_ylabel(f'{param} ({UNITS[param]})')
-        ax.set_title(title, fontweight='bold')
-        ax.grid(True, alpha=0.3)
+#         ax.set_ylabel(f'{param} ({UNITS[param]})')
+#         ax.set_title(title, fontweight='bold')
+#         ax.grid(True, alpha=0.3)
 
-    # Add Hurricane Helene annotation to top plot
-    axes[0].annotate('Hurricane\nHelene', xy=(pd.Timestamp('2024-09-27'), axes[0].get_ylim()[1]),
-                    xytext=(pd.Timestamp('2024-06-01'), axes[0].get_ylim()[1]*0.85),
-                    fontsize=8, ha='center',
-                    arrowprops=dict(arrowstyle='->', color='red', alpha=0.7))
+#     # Add Hurricane Helene annotation to top plot
+#     axes[0].annotate('Hurricane\nHelene', xy=(pd.Timestamp('2024-09-27'), axes[0].get_ylim()[1]),
+#                     xytext=(pd.Timestamp('2024-06-01'), axes[0].get_ylim()[1]*0.85),
+#                     fontsize=8, ha='center',
+#                     arrowprops=dict(arrowstyle='->', color='red', alpha=0.7))
 
-    # Format x-axis
-    axes[1].xaxis.set_major_locator(mdates.YearLocator())
-    axes[1].xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
-    axes[1].set_xlabel('Date')
+#     # Format x-axis
+#     axes[1].xaxis.set_major_locator(mdates.YearLocator())
+#     axes[1].xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+#     axes[1].set_xlabel('Date')
 
-    # Legend - moved to left side to avoid covering Hurricane Helene annotation
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='center left', bbox_to_anchor=(0.02, 0.5),
-              ncol=1, frameon=True, fancybox=True)
+#     # Legend - moved to left side to avoid covering Hurricane Helene annotation
+#     handles, labels = axes[0].get_legend_handles_labels()
+#     fig.legend(handles, labels, loc='center left', bbox_to_anchor=(0.02, 0.5),
+#               ncol=1, frameon=True, fancybox=True)
 
-    fig.suptitle('Chemical Parameters at River Monitoring Sites (2018-2025)',
-                fontweight='bold', y=1.02)
+#     fig.suptitle('Chemical Parameters at River Monitoring Sites (2018-2025)',
+#                 fontweight='bold', y=1.02)
 
-    plt.tight_layout()
-    plt.savefig(OUTPUT_DIR / 'timeseries_PO4_NH3_river_sites.png',
-               bbox_inches='tight', facecolor='white')
-    plt.close()
-    print(f"Saved: {OUTPUT_DIR / 'timeseries_PO4_NH3_river_sites.png'}")
+#     plt.tight_layout()
+#     plt.savefig(OUTPUT_DIR / 'timeseries_PO4_NH3_river_sites.png',
+#                bbox_inches='tight', facecolor='white')
+#     plt.close()
+#     print(f"Saved: {OUTPUT_DIR / 'timeseries_PO4_NH3_river_sites.png'}")
 
 
 def plot_time_series_individual(df, param, sites_dict, colors_dict, site_type='River'):
@@ -326,7 +326,7 @@ def plot_boxplots_river_sites(df):
         ax.set_ylabel(f'{param} ({UNITS[param]})')
         ax.set_xlabel('')
         ax.set_title(title, fontweight='bold')
-        ax.tick_params(axis='x', rotation=45)
+        ax.tick_params(axis='x', rotation=0)
         ax.grid(True, axis='y', alpha=0.3)
 
     # Add period of record note with better positioning
@@ -341,79 +341,79 @@ def plot_boxplots_river_sites(df):
     print(f"Saved: {OUTPUT_DIR / 'boxplots_river_sites.png'}")
 
 
-def plot_boxplots_lake_sites(df, chlor_df):
-    """Create box plots for NH3-N, Total P, and Chlorophyll a at lake sites."""
-    fig, axes = plt.subplots(1, 3, figsize=(14, 5))
+# def plot_boxplots_lake_sites(df, chlor_df):
+#     """Create box plots for NH3-N, Total P, and Chlorophyll a at lake sites."""
+#     fig, axes = plt.subplots(1, 3, figsize=(14, 5))
 
-    # Prepare lake data
-    lake_df = df[df['site #'].isin(LAKE_SITES.keys())].copy()
-    lake_df['Site'] = lake_df['site #'].map(lambda x: f"{x}: {LAKE_SITES[x]}")
+#     # Prepare lake data
+#     lake_df = df[df['site #'].isin(LAKE_SITES.keys())].copy()
+#     lake_df['Site'] = lake_df['site #'].map(lambda x: f"{x}: {LAKE_SITES[x]}")
 
-    chlor_df_plot = chlor_df.copy()
-    chlor_df_plot['Site'] = chlor_df_plot['site #'].map(lambda x: f"{x}: {LAKE_SITES[x]}")
+#     chlor_df_plot = chlor_df.copy()
+#     chlor_df_plot['Site'] = chlor_df_plot['site #'].map(lambda x: f"{x}: {LAKE_SITES[x]}")
 
-    site_order = [f"{s}: {LAKE_SITES[s]}" for s in ['6', '7', '8', '9', '11']]
+#     site_order = [f"{s}: {LAKE_SITES[s]}" for s in ['6', '7', '8', '9', '11']]
 
-    # Plot 1: NH3-N
-    ax = axes[0]
-    plot_data = lake_df.dropna(subset=['NH3-N'])
-    sns.boxplot(data=plot_data, x='Site', y='NH3-N', ax=ax,
-               order=site_order, hue='Site', palette='Blues', width=0.6, legend=False)
-    ax.set_ylabel(f'NH₃-N ({UNITS["NH3-N"]})')
-    ax.set_xlabel('')
-    ax.set_title('Ammonia-Nitrogen (NH₃-N)', fontweight='bold')
-    ax.tick_params(axis='x', rotation=45)
-    ax.grid(True, axis='y', alpha=0.3)
-    for i, site in enumerate(site_order):
-        n = len(plot_data[plot_data['Site'] == site])
-        ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=8, color='gray')
+#     # Plot 1: NH3-N
+#     ax = axes[0]
+#     plot_data = lake_df.dropna(subset=['NH3-N'])
+#     sns.boxplot(data=plot_data, x='Site', y='NH3-N', ax=ax,
+#                order=site_order, hue='Site', palette='Blues', width=0.6, legend=False)
+#     ax.set_ylabel(f'NH₃-N ({UNITS["NH3-N"]})')
+#     ax.set_xlabel('')
+#     ax.set_title('Ammonia-Nitrogen (NH₃-N)', fontweight='bold')
+#     ax.tick_params(axis='x', rotation=0)
+#     ax.grid(True, axis='y', alpha=0.3)
+#     for i, site in enumerate(site_order):
+#         n = len(plot_data[plot_data['Site'] == site])
+#         ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=8, color='gray')
 
-    # Plot 2: Total P
-    ax = axes[1]
-    plot_data = lake_df.dropna(subset=['Total P'])
-    sns.boxplot(data=plot_data, x='Site', y='Total P', ax=ax,
-               order=site_order, hue='Site', palette='Greens', width=0.6, legend=False)
-    ax.set_ylabel(f'Total P ({UNITS["Total P"]})')
-    ax.set_xlabel('')
-    ax.set_title('Total Phosphorus (as PO₄)', fontweight='bold')
-    ax.tick_params(axis='x', rotation=45)
-    ax.grid(True, axis='y', alpha=0.3)
-    for i, site in enumerate(site_order):
-        n = len(plot_data[plot_data['Site'] == site])
-        ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=8, color='gray')
+#     # Plot 2: Total P
+#     ax = axes[1]
+#     plot_data = lake_df.dropna(subset=['Total P'])
+#     sns.boxplot(data=plot_data, x='Site', y='Total P', ax=ax,
+#                order=site_order, hue='Site', palette='Greens', width=0.6, legend=False)
+#     ax.set_ylabel(f'Total P ({UNITS["Total P"]})')
+#     ax.set_xlabel('')
+#     ax.set_title('Total Phosphorus (as PO₄)', fontweight='bold')
+#     ax.tick_params(axis='x', rotation=0)
+#     ax.grid(True, axis='y', alpha=0.3)
+#     for i, site in enumerate(site_order):
+#         n = len(plot_data[plot_data['Site'] == site])
+#         ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=8, color='gray')
 
-    # Plot 3: Chlorophyll a
-    ax = axes[2]
-    sns.boxplot(data=chlor_df_plot, x='Site', y='Chlor_a', ax=ax,
-               order=site_order, hue='Site', palette='YlGn', width=0.6, legend=False)
-    ax.set_ylabel(f'Chlorophyll a ({UNITS["Chlor_a"]})')
-    ax.set_xlabel('')
-    ax.set_title('Chlorophyll a', fontweight='bold')
-    ax.tick_params(axis='x', rotation=45)
-    ax.grid(True, axis='y', alpha=0.3)
+#     # Plot 3: Chlorophyll a
+#     ax = axes[2]
+#     sns.boxplot(data=chlor_df_plot, x='Site', y='Chlor_a', ax=ax,
+#                order=site_order, hue='Site', palette='YlGn', width=0.6, legend=False)
+#     ax.set_ylabel(f'Chlorophyll a ({UNITS["Chlor_a"]})')
+#     ax.set_xlabel('')
+#     ax.set_title('Chlorophyll a', fontweight='bold')
+#     ax.tick_params(axis='x', rotation=0)
+#     ax.grid(True, axis='y', alpha=0.3)
 
-    # Chlorophyll thresholds
-    ax.axhline(y=2.5, color='green', linestyle=':', linewidth=1, alpha=0.7)
-    ax.axhline(y=8, color='orange', linestyle=':', linewidth=1, alpha=0.7)
-    ax.annotate('Oligotrophic', xy=(ax.get_xlim()[1], 2.5), fontsize=7, color='green', va='bottom')
-    ax.annotate('Eutrophic', xy=(ax.get_xlim()[1], 8), fontsize=7, color='orange', va='bottom')
+#     # Chlorophyll thresholds
+#     ax.axhline(y=2.5, color='green', linestyle=':', linewidth=1, alpha=0.7)
+#     ax.axhline(y=8, color='orange', linestyle=':', linewidth=1, alpha=0.7)
+#     ax.annotate('Oligotrophic', xy=(ax.get_xlim()[1], 2.5), fontsize=7, color='green', va='bottom')
+#     ax.annotate('Eutrophic', xy=(ax.get_xlim()[1], 8), fontsize=7, color='orange', va='bottom')
 
-    for i, site in enumerate(site_order):
-        n = len(chlor_df_plot[chlor_df_plot['Site'] == site])
-        ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=8, color='gray')
+#     for i, site in enumerate(site_order):
+#         n = len(chlor_df_plot[chlor_df_plot['Site'] == site])
+#         ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=8, color='gray')
 
-    # Add period of record note
-    chem_range = f"Chemical: {lake_df['date'].min().strftime('%Y-%m')} to {lake_df['date'].max().strftime('%Y-%m')}"
-    chlor_range = f"Chlorophyll: {chlor_df['date'].min().strftime('%Y-%m')} to {chlor_df['date'].max().strftime('%Y-%m')}"
-    fig.text(0.5, -0.02, f'Period of Record — {chem_range}; {chlor_range}',
-            ha='center', fontsize=9, style='italic')
+#     # Add period of record note
+#     chem_range = f"Chemical: {lake_df['date'].min().strftime('%Y-%m')} to {lake_df['date'].max().strftime('%Y-%m')}"
+#     chlor_range = f"Chlorophyll: {chlor_df['date'].min().strftime('%Y-%m')} to {chlor_df['date'].max().strftime('%Y-%m')}"
+#     fig.text(0.5, -0.02, f'Period of Record — {chem_range}; {chlor_range}',
+#             ha='center', fontsize=9, style='italic')
 
-    fig.suptitle('Chemical Parameters at Lake James Sites', fontweight='bold', y=1.02)
+#     fig.suptitle('Chemical Parameters at Lake James Sites', fontweight='bold', y=1.02)
 
-    plt.tight_layout()
-    plt.savefig(OUTPUT_DIR / 'boxplots_lake_sites.png', bbox_inches='tight', facecolor='white')
-    plt.close()
-    print(f"Saved: {OUTPUT_DIR / 'boxplots_lake_sites.png'}")
+#     plt.tight_layout()
+#     plt.savefig(OUTPUT_DIR / 'boxplots_lake_sites.png', bbox_inches='tight', facecolor='white')
+#     plt.close()
+#     print(f"Saved: {OUTPUT_DIR / 'boxplots_lake_sites.png'}")
 
 
 # =============================================================================
@@ -421,6 +421,8 @@ def plot_boxplots_lake_sites(df, chlor_df):
 # =============================================================================
 
 def plot_time_series_by_site(df):
+    start_date = pd.Timestamp('2017-12-01')
+    end_date = pd.Timestamp('2026-2-1')
     """Create individual time series plots for each site showing PO4 and NH3-N."""
     for site_id, site_name in RIVER_SITES.items():
         site_data = df[df['site #'] == site_id].sort_values('date')
@@ -449,16 +451,14 @@ def plot_time_series_by_site(df):
 
                 # Hurricane Helene marker
                 ax.axvline(x=pd.Timestamp('2024-09-27'), color='red', linestyle='--',
-                          linewidth=1.5, alpha=0.7)
+                          linewidth=1.5, alpha=0.7, label='Hurricane Helene')
 
                 ax.set_ylabel(f'{param} ({UNITS[param]})')
                 ax.set_title(title, fontweight='bold')
                 ax.grid(True, alpha=0.3)
                 ax.legend(loc='upper left', fontsize=8)
+                ax.set_xlim(start_date, end_date)
 
-        # Add Hurricane annotation
-        axes[0].annotate('Hurricane\nHelene', xy=(pd.Timestamp('2024-09-27'), axes[0].get_ylim()[1]*0.9),
-                        fontsize=8, ha='left', color='red')
 
         # Format x-axis
         axes[1].xaxis.set_major_locator(mdates.YearLocator())
@@ -491,7 +491,7 @@ def plot_boxplot_single_param_river(df, param, title, palette='Set2'):
     # Remove highest 2 outliers for TSS
     if param == 'TSS' and len(plot_data) > 2:
         sorted_tss = plot_data[param].sort_values(ascending=False)
-        threshold = sorted_tss.iloc[2]  # Keep up to third highest
+        threshold = sorted_tss.iloc[6]  # Keep up to fifth highest
         plot_data = plot_data[plot_data[param] <= threshold]
 
     if len(plot_data) == 0:
@@ -506,31 +506,42 @@ def plot_boxplot_single_param_river(df, param, title, palette='Set2'):
 
     # Add reference lines with improved visibility
     if param in REGIONAL_AVG:
-        ax.axhline(y=REGIONAL_AVG[param], color='gray', linestyle='--',
-                  linewidth=2, alpha=1.0)
-        ax.axhline(y=PRISTINE_AVG[param], color='green', linestyle=':',
-                  linewidth=2, alpha=1.0)
-        # Add labels to reference lines
-        ax.text(ax.get_xlim()[1], REGIONAL_AVG[param], f'Regional Avg ({REGIONAL_AVG[param]})', 
-               fontsize=9, va='bottom', ha='right', color='gray', backgroundcolor='white')
-        ax.text(ax.get_xlim()[1], PRISTINE_AVG[param], f'Pristine Avg ({PRISTINE_AVG[param]})', 
-               fontsize=9, va='bottom', ha='right', color='green', backgroundcolor='white')
+        line_regional = ax.axhline(
+            y=REGIONAL_AVG[param], color='gray', linestyle='--', linewidth=2, alpha=1.0
+        )
+        line_pristine = ax.axhline(
+            y=PRISTINE_AVG[param], color='green', linestyle=':', linewidth=2, alpha=1.0
+        )
+
+        # Add labels to reference lines (annotations)
+        # ax.text(ax.get_xlim()[1], REGIONAL_AVG[param], 
+        #         f'Regional Avg ({REGIONAL_AVG[param]})', 
+        #         fontsize=9, va='bottom', ha='right', color='gray', backgroundcolor='white')
+        # ax.text(ax.get_xlim()[1], PRISTINE_AVG[param], 
+        #         f'Pristine Avg ({PRISTINE_AVG[param]})', 
+        #         fontsize=9, va='bottom', ha='right', color='green', backgroundcolor='white')
+
+        # Add to legend
+        ax.legend(handles=[line_regional, line_pristine],
+                labels=[f'Regional Avg ({REGIONAL_AVG[param]})', 
+                        f'Pristine Avg ({PRISTINE_AVG[param]})'],
+                loc='upper right')
 
     # Add sample sizes
     for i, site in enumerate(site_order):
         n = len(plot_data[plot_data['Site'] == site])
-        ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=9, color='gray')
+        ax.text(i, -0.08, f'n={n}', ha='center', va='top', fontsize=9, color='gray', transform=ax.get_xaxis_transform())
 
     # Add note for TSS outliers
     if param == 'TSS':
-        ax.text(0.02, 0.98, 'Note: Highest 2 TSS outliers removed', 
+        ax.text(0.02, 0.98, 'Note: Highest 6 TSS outliers removed', 
                transform=ax.transAxes, fontsize=9, va='top', ha='left', 
                bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7))
 
     ax.set_ylabel(f'{param} ({UNITS[param]})')
     ax.set_xlabel('Site')
     ax.set_title(f'{title}\nRiver Monitoring Sites (2018-2025)', fontweight='bold')
-    ax.tick_params(axis='x', rotation=45)
+    ax.tick_params(axis='x', rotation=0)
     ax.grid(True, axis='y', alpha=0.3)
 
     # Add period of record with better positioning
@@ -570,20 +581,28 @@ def plot_boxplot_single_param_lake(df, chlor_df, param, title, palette='Blues'):
 
     # Add thresholds for chlorophyll
     if param == 'Chlor_a':
-        ax.axhline(y=2.5, color='green', linestyle=':', linewidth=1.5, alpha=0.7)
-        ax.axhline(y=8, color='orange', linestyle=':', linewidth=1.5, alpha=0.7)
-        ax.annotate('Oligotrophic (<2.5)', xy=(ax.get_xlim()[1], 2.5), fontsize=8, color='green', va='bottom', ha='right')
-        ax.annotate('Eutrophic (>8)', xy=(ax.get_xlim()[1], 8), fontsize=8, color='orange', va='bottom', ha='right')
+        line_oligo = ax.axhline(y=2.5, color='green', linestyle=':', linewidth=2, alpha=1.0)
+        line_eutro = ax.axhline(y=8, color='orange', linestyle=':', linewidth=2, alpha=1.0)
 
+        # Add text annotations (optional)
+        # ax.annotate('Oligotrophic (<2.5)', xy=(ax.get_xlim()[1], 2.5), fontsize=8, color='green',
+        #             va='bottom', ha='right')
+        # ax.annotate('Eutrophic (>8)', xy=(ax.get_xlim()[1], 8), fontsize=8, color='orange',
+        #             va='bottom', ha='right')
+
+        # ➜ Add legend entries
+        ax.legend(handles=[line_oligo, line_eutro],
+                labels=['Oligotrophic (<2.5)', 'Eutrophic (>8)'],
+                loc='upper right')
     # Add sample sizes
     for i, site in enumerate(site_order):
         n = len(plot_df[plot_df['Site'] == site])
-        ax.annotate(f'n={n}', xy=(i, ax.get_ylim()[0]), ha='center', va='top', fontsize=9, color='gray')
+        ax.text(i, -0.10, f'n={n}', ha='center', va='top', fontsize=9, color='gray', transform=ax.get_xaxis_transform())
 
     ax.set_ylabel(f'{param} ({UNITS[param]})')
     ax.set_xlabel('Site')
     ax.set_title(f'{title}\nLake James Sites (2018-2025)', fontweight='bold')
-    ax.tick_params(axis='x', rotation=45)
+    ax.tick_params(axis='x', rotation=0) # prev 45
     ax.grid(True, axis='y', alpha=0.3)
 
     # Add period of record
@@ -616,8 +635,8 @@ def main():
     print(f"  Chlorophyll data: {len(chlor_df)} records")
 
     # Generate combined time series plots (all sites overlaid)
-    print("\nGenerating combined time series plots...")
-    plot_time_series_po4_nh3(df)
+    # print("\nGenerating combined time series plots...")
+    # plot_time_series_po4_nh3(df)
 
     # Individual time series for each parameter (all sites overlaid)
     for param in ['PO4', 'NH3-N']:
@@ -630,7 +649,7 @@ def main():
     # Generate combined box plots (3 params in one figure)
     print("\nGenerating combined box plots...")
     plot_boxplots_river_sites(df)
-    plot_boxplots_lake_sites(df, chlor_df)
+    #plot_boxplots_lake_sites(df, chlor_df)
 
     # Generate individual parameter box plots - River sites
     print("\nGenerating individual parameter box plots (river)...")
